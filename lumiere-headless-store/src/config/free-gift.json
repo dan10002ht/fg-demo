@@ -1,0 +1,13 @@
+{
+  "isActive": true,
+  "triggerType": "productType",
+  "triggerValue": "T-Shirt",
+  "giftProductHandle": "classic-socks",
+  "giftVariantId": null,
+  "quantityMode": "fixed",
+  "fixedQuantity": 1,
+  "maxGiftQuantity": 1,
+  "giftLabel": "Free Gift",
+  "bannerText": "Buy this product and get FREE Socks!",
+  "showBannerOnPDP": true
+}
