@@ -1,165 +1,148 @@
-import defaultConfig from "@/config/free-gift.json";
 import { getProductByHandle } from "@/lib/shopify";
-
-const STORAGE_KEY = "freeGiftConfig";
+import { loadFromStorage, getDefaultState } from "@/lib/campaign-store";
 
 /**
- * Get the free gift configuration.
- * Merges default config with any admin overrides stored in localStorage.
+ * Get the current campaign configuration
  */
 export function getFreeGiftConfig() {
-  if (typeof window === "undefined") return defaultConfig;
+  if (typeof window === "undefined") return getDefaultState();
+  const stored = loadFromStorage();
+  return stored || getDefaultState();
+}
+
+/**
+ * Check if the campaign is currently active based on schedule and status
+ */
+export function isCampaignActive(config) {
+  if (!config || !config.isActive) return false;
+
+  const now = new Date();
+
+  if (config.startDate && config.startTime) {
+    const start = new Date(`${config.startDate}T${config.startTime}`);
+    if (now < start) return false;
+  }
+
+  if (config.hasEndDate && config.endDate && config.endTime) {
+    const end = new Date(`${config.endDate}T${config.endTime}`);
+    if (now > end) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Check if a product is in the "Customer buys" condition
+ */
+export function isProductInBuyCondition(product, config) {
+  if (!config || !product) return false;
+
+  if (config.buyConditionType === "specificProducts") {
+    return config.buyProducts.some(
+      (bp) => bp.productId === product.id || bp.handle === product.handle
+    );
+  }
+
+  return false;
+}
+
+/**
+ * Legacy alias — checks campaign active AND product matches
+ */
+export function isGiftTriggerProduct(product, config) {
+  return isCampaignActive(config) && isProductInBuyCondition(product, config);
+}
+
+/**
+ * Calculate how many gift sets to give based on trigger quantity and config
+ */
+export function calculateGiftQuantity(triggerQty, config) {
+  if (!config || triggerQty < config.minimumQuantity) return 0;
+
+  if (config.multiApply) {
+    return Math.floor(triggerQty / config.minimumQuantity);
+  }
+
+  return 1;
+}
+
+/**
+ * Fetch the first gift product from Shopify
+ */
+export async function getGiftProduct(config) {
+  if (!config?.getProducts?.length) return null;
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return { ...defaultConfig, ...JSON.parse(stored) };
-    }
-  } catch {
-    // ignore parse errors
-  }
-  return defaultConfig;
-}
-
-/**
- * Save free gift configuration to localStorage (admin use).
- */
-export function saveFreeGiftConfig(config) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-}
-
-/**
- * Check if a product matches the gift trigger criteria.
- * Works with both full product objects (PDP) and cart line merchandise.
- */
-export function isGiftTriggerProduct(product, config = null) {
-  const cfg = config || getFreeGiftConfig();
-  if (!cfg.isActive) return false;
-
-  switch (cfg.triggerType) {
-    case "productType":
-      return (
-        product.productType?.toLowerCase() ===
-        cfg.triggerValue.toLowerCase()
-      );
-    case "tag":
-      return (product.tags || []).some(
-        (tag) => tag.toLowerCase() === cfg.triggerValue.toLowerCase()
-      );
-    case "specificProduct":
-      return product.handle === cfg.triggerValue;
-    default:
-      return false;
-  }
-}
-
-/**
- * Fetch the gift product from Shopify by handle.
- * Returns the product with its variants, or null if not found.
- */
-export async function getGiftProduct(config = null) {
-  const cfg = config || getFreeGiftConfig();
-  try {
-    const product = await getProductByHandle(cfg.giftProductHandle);
-    return product;
-  } catch (error) {
-    console.error("Failed to fetch gift product:", error);
+    return await getProductByHandle(config.getProducts[0].handle);
+  } catch (e) {
+    console.error("Failed to fetch gift product:", e);
     return null;
   }
 }
 
 /**
- * Get the variant ID to use for the gift product.
- * Uses configured variantId if set, otherwise the first available variant.
+ * Get all available gift products (for popup / auto-add)
  */
-export function getGiftVariantId(giftProduct, config = null) {
-  const cfg = config || getFreeGiftConfig();
+export async function getAvailableGifts(config) {
+  if (!config?.getProducts?.length) return [];
 
-  if (cfg.giftVariantId) {
-    return cfg.giftVariantId;
+  const results = [];
+  for (const giftCfg of config.getProducts) {
+    try {
+      const product = await getProductByHandle(giftCfg.handle);
+      if (product?.availableForSale) {
+        results.push({
+          ...product,
+          giftQuantity: giftCfg.giftQuantity || 1,
+          configProductId: giftCfg.productId,
+        });
+      }
+    } catch (e) {
+      console.error(`Failed to fetch gift ${giftCfg.handle}:`, e);
+    }
   }
-
-  const variants = giftProduct.variants.edges.map((e) => e.node);
-  const available = variants.find((v) => v.availableForSale);
-  return available?.id || variants[0]?.id || null;
+  return results;
 }
 
 /**
- * Check if a gift variant is available for sale.
+ * Check if a gift product has available variants
  */
-export function isGiftAvailable(giftProduct, config = null) {
-  const cfg = config || getFreeGiftConfig();
-
-  const variants = giftProduct.variants.edges.map((e) => e.node);
-
-  if (cfg.giftVariantId) {
-    const variant = variants.find((v) => v.id === cfg.giftVariantId);
-    return variant?.availableForSale ?? false;
-  }
-
+export function isGiftAvailable(product) {
+  if (!product) return false;
+  const variants = product.variants?.edges?.map((e) => e.node) || [];
   return variants.some((v) => v.availableForSale);
 }
 
 /**
- * Calculate how many gift items should be in the cart based on trigger quantity.
+ * Check if a cart line is a gift by its ID being in giftLineIds
  */
-export function calculateGiftQuantity(triggerQuantity, config = null) {
-  const cfg = config || getFreeGiftConfig();
-
-  if (triggerQuantity <= 0) return 0;
-
-  let giftQty;
-  if (cfg.quantityMode === "perItem") {
-    giftQty = triggerQuantity;
-  } else {
-    // fixed mode
-    giftQty = cfg.fixedQuantity || 1;
-  }
-
-  // Apply max limit
-  if (cfg.maxGiftQuantity && cfg.maxGiftQuantity > 0) {
-    giftQty = Math.min(giftQty, cfg.maxGiftQuantity);
-  }
-
-  return giftQty;
+export function isGiftLineItem(lineItem, giftLineIds) {
+  if (!giftLineIds?.length) return false;
+  return giftLineIds.includes(lineItem.id);
 }
 
 /**
- * Check if a cart line item is a free gift by looking at its attributes.
+ * Count trigger products in cart lines
  */
-export function isGiftLineItem(line) {
-  const attributes = line.attributes || [];
-  return attributes.some(
-    (attr) => attr.key === "_isGift" && attr.value === "true"
-  );
-}
+export function countTriggerProductsInCart(cartLines, config) {
+  if (!cartLines || !config) return 0;
 
-/**
- * Get the total quantity of trigger products in the cart lines.
- */
-export function getTriggerQuantityFromLines(lines, config = null) {
-  const cfg = config || getFreeGiftConfig();
-  let total = 0;
-
-  for (const line of lines) {
-    if (isGiftLineItem(line)) continue;
-
+  let count = 0;
+  for (const line of cartLines) {
     const product = line.merchandise?.product;
-    if (!product) continue;
-
-    const matches = isGiftTriggerProduct(product, cfg);
-    if (matches) {
-      total += line.quantity;
+    if (product && isProductInBuyCondition(product, config)) {
+      count += line.quantity;
     }
   }
-
-  return total;
+  return count;
 }
 
 /**
- * Find the gift line item in cart lines.
+ * Get the first available gift variant ID
  */
-export function findGiftLineItem(lines) {
-  return lines.find((line) => isGiftLineItem(line)) || null;
+export function getGiftVariantId(product) {
+  if (!product) return null;
+  const variants = product.variants?.edges?.map((e) => e.node) || [];
+  const available = variants.find((v) => v.availableForSale);
+  return available?.id || null;
 }

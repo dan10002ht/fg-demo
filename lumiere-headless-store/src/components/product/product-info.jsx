@@ -1,20 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Truck, Leaf, Hand, Gift } from "lucide-react";
+import { Check, Truck, Leaf, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useCartStore from "@/store/cart-store";
 import { formatPrice } from "@/lib/shopify";
 import SubscriptionWidget from "@/components/subscription/subscription-widget";
 import ProductBundleWidget from "@/components/subscription/product-bundle-widget";
-import {
-  getFreeGiftConfig,
-  isGiftTriggerProduct,
-  getGiftProduct,
-  isGiftAvailable,
-} from "@/lib/free-gift";
+import PromotionCard from "@/components/gift/promotion-card";
 
 export default function ProductInfo({ product }) {
   const variants = product.variants.edges.map((edge) => edge.node);
@@ -22,42 +17,6 @@ export default function ProductInfo({ product }) {
   const { addItem, loading } = useCartStore();
   const [justAdded, setJustAdded] = useState(false);
   const [subscriptionSelection, setSubscriptionSelection] = useState(null);
-  const [giftBanner, setGiftBanner] = useState(null);
-
-  // Check if this product triggers a free gift
-  useEffect(() => {
-    let cancelled = false;
-
-    async function checkGiftBanner() {
-      const config = getFreeGiftConfig();
-      if (!config.isActive || !config.showBannerOnPDP) {
-        setGiftBanner(null);
-        return;
-      }
-
-      if (!isGiftTriggerProduct(product, config)) {
-        setGiftBanner(null);
-        return;
-      }
-
-      // Fetch gift product to check availability
-      const giftProd = await getGiftProduct(config);
-      if (cancelled) return;
-
-      if (giftProd && isGiftAvailable(giftProd, config)) {
-        setGiftBanner({
-          text: config.bannerText,
-          giftTitle: giftProd.title,
-          giftImage: giftProd.images?.edges?.[0]?.node?.url || null,
-        });
-      } else {
-        setGiftBanner(null);
-      }
-    }
-
-    checkGiftBanner();
-    return () => { cancelled = true; };
-  }, [product]);
 
   const optionNames = [
     ...new Set(
@@ -141,29 +100,8 @@ export default function ProductInfo({ product }) {
 
       <Separator />
 
-      {/* Free Gift Banner */}
-      <AnimatePresence>
-        {giftBanner && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3"
-          >
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
-              <Gift className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-emerald-800">
-                {giftBanner.text}
-              </p>
-              <p className="mt-0.5 text-xs text-emerald-600">
-                {giftBanner.giftTitle}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Free Gift Promotion Card */}
+      <PromotionCard product={product} />
 
       {/* Variant options */}
       {optionNames.length > 0 && (

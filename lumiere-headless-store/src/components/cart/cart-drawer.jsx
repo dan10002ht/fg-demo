@@ -11,9 +11,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import useCartStore from "@/store/cart-store";
+import useCartStore, { isGiftLine } from "@/store/cart-store";
 import { formatPrice } from "@/lib/shopify";
-import { isGiftLineItem } from "@/lib/free-gift";
+import GiftPopup from "@/components/gift/gift-popup";
+import CongratulationBar from "@/components/gift/congratulation-bar";
 
 const FREE_SHIPPING_THRESHOLD = 75;
 
@@ -30,6 +31,14 @@ export default function CartDrawer() {
     removeItem,
     giftNotification,
     clearGiftNotification,
+    showGiftPopup,
+    closeGiftPopup,
+    availableGifts,
+    showCongratBar,
+    congratGiftName,
+    closeCongratBar,
+    addGiftItem,
+    giftConfig,
   } = useCartStore();
 
   const lines = getCartLines();
@@ -50,161 +59,185 @@ export default function CartDrawer() {
 
   // Sort lines: regular items first, gift items last
   const sortedLines = [...lines].sort((a, b) => {
-    const aIsGift = isGiftLineItem(a);
-    const bIsGift = isGiftLineItem(b);
+    const aIsGift = isGiftLine(a);
+    const bIsGift = isGiftLine(b);
     if (aIsGift && !bIsGift) return 1;
     if (!aIsGift && bIsGift) return -1;
     return 0;
   });
 
   return (
-    <Sheet open={isOpen} onOpenChange={closeCart}>
-      <SheetContent className="flex w-full flex-col px-6 sm:max-w-lg">
-        <SheetHeader className="px-0">
-          <SheetTitle className="text-left font-serif text-xl font-light tracking-wider">
-            Your Cart
-          </SheetTitle>
-        </SheetHeader>
+    <>
+      {/* Congratulation Bar */}
+      <CongratulationBar
+        show={showCongratBar}
+        giftName={congratGiftName}
+        onClose={closeCongratBar}
+        congratsTitle={giftConfig?.congratsBarTitle}
+        duration={giftConfig?.congratsBarDuration}
+      />
 
-        {/* Gift notification toast */}
-        <AnimatePresence>
-          {giftNotification && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div
-                className={`mb-2 flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
-                  giftNotification.type === "added"
-                    ? "bg-emerald-50 text-emerald-700"
-                    : giftNotification.type === "outOfStock"
-                    ? "bg-amber-50 text-amber-700"
-                    : "bg-stone-100 text-stone-600"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Gift className="h-3.5 w-3.5" />
-                  {giftNotification.message}
-                </span>
-                <button
-                  onClick={clearGiftNotification}
-                  className="ml-2 opacity-60 hover:opacity-100"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* Gift Selection Popup */}
+      <GiftPopup
+        open={showGiftPopup}
+        onClose={closeGiftPopup}
+        gifts={availableGifts}
+        onSelectGift={addGiftItem}
+        popupTitle={giftConfig?.popupTitle}
+        popupDescription={giftConfig?.popupDescription}
+      />
 
-        {/* Free shipping progress */}
-        {totalNum > 0 && (
-          <div className="pb-2">
-            {remaining > 0 ? (
-              <p className="mb-2 text-center text-xs text-muted-foreground">
-                You&apos;re{" "}
-                <span className="font-medium text-warm">
-                  {formatPrice(remaining, currency)}
-                </span>{" "}
-                away from free shipping
-              </p>
-            ) : (
-              <p className="mb-2 text-center text-xs text-warm">
-                You&apos;ve earned free shipping!
-              </p>
-            )}
-            <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+      <Sheet open={isOpen} onOpenChange={closeCart}>
+        <SheetContent className="flex w-full flex-col px-6 sm:max-w-lg">
+          <SheetHeader className="px-0">
+            <SheetTitle className="text-left font-serif text-xl font-light tracking-wider">
+              Your Cart
+            </SheetTitle>
+          </SheetHeader>
+
+          {/* Gift notification toast */}
+          <AnimatePresence>
+            {giftNotification && (
               <motion.div
-                className="h-full rounded-full bg-warm"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
-            </div>
-          </div>
-        )}
-
-        {lines.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
-              <Flame className="h-7 w-7 text-warm/50" />
-            </div>
-            <div className="text-center">
-              <p className="font-serif text-lg font-light">
-                Your cart is empty
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Discover our handcrafted candles and fill your space with warmth.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={closeCart}
-              className="mt-2 text-xs uppercase tracking-wider"
-            >
-              Continue Shopping
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="flex-1 overflow-y-auto py-4">
-              <AnimatePresence initial={false}>
-                {sortedLines.map((line) => (
-                  <motion.div
-                    key={line.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{
-                      opacity: 0,
-                      height: 0,
-                      transition: { duration: 0.2 },
-                    }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    {isGiftLineItem(line) ? (
-                      <GiftCartItem line={line} />
-                    ) : (
-                      <CartItem
-                        line={line}
-                        loading={loading}
-                        onUpdateQuantity={updateItemQuantity}
-                        onRemove={removeItem}
-                      />
-                    )}
-                    <div className="my-3 h-px bg-border/50" />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-
-            <div className="border-t pb-6 pt-4">
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-muted-foreground">Subtotal</span>
-                <span className="font-serif text-lg">
-                  {formatPrice(total, currency)}
-                </span>
-              </div>
-              <p className="mb-4 text-xs text-muted-foreground">
-                Shipping and taxes calculated at checkout.
-              </p>
-              <Button
-                className="btn-shimmer w-full border-0 text-xs uppercase tracking-wider text-white h-12"
-                size="lg"
-                disabled={loading}
-                onClick={() => {
-                  if (checkoutUrl) window.location.href = checkoutUrl;
-                }}
+                initial={{ opacity: 0, y: -10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                className="overflow-hidden"
               >
-                Checkout
+                <div
+                  className={`mb-2 flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
+                    giftNotification.type === "added"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : giftNotification.type === "outOfStock"
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-stone-100 text-stone-600"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Gift className="h-3.5 w-3.5" />
+                    {giftNotification.message}
+                  </span>
+                  <button
+                    onClick={clearGiftNotification}
+                    className="ml-2 opacity-60 hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Free shipping progress */}
+          {totalNum > 0 && (
+            <div className="pb-2">
+              {remaining > 0 ? (
+                <p className="mb-2 text-center text-xs text-muted-foreground">
+                  You&apos;re{" "}
+                  <span className="font-medium text-warm">
+                    {formatPrice(remaining, currency)}
+                  </span>{" "}
+                  away from free shipping
+                </p>
+              ) : (
+                <p className="mb-2 text-center text-xs text-warm">
+                  You&apos;ve earned free shipping!
+                </p>
+              )}
+              <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+                <motion.div
+                  className="h-full rounded-full bg-warm"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+          )}
+
+          {lines.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
+                <Flame className="h-7 w-7 text-warm/50" />
+              </div>
+              <div className="text-center">
+                <p className="font-serif text-lg font-light">
+                  Your cart is empty
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Discover our handcrafted candles and fill your space with
+                  warmth.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={closeCart}
+                className="mt-2 text-xs uppercase tracking-wider"
+              >
+                Continue Shopping
               </Button>
             </div>
-          </>
-        )}
-      </SheetContent>
-    </Sheet>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto py-4">
+                <AnimatePresence initial={false}>
+                  {sortedLines.map((line) => (
+                    <motion.div
+                      key={line.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{
+                        opacity: 0,
+                        height: 0,
+                        transition: { duration: 0.2 },
+                      }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      {isGiftLine(line) ? (
+                        <GiftCartItem line={line} />
+                      ) : (
+                        <CartItem
+                          line={line}
+                          loading={loading}
+                          onUpdateQuantity={updateItemQuantity}
+                          onRemove={removeItem}
+                        />
+                      )}
+                      <div className="my-3 h-px bg-border/50" />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              <div className="border-t pb-6 pt-4">
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-muted-foreground">
+                    Subtotal
+                  </span>
+                  <span className="font-serif text-lg">
+                    {formatPrice(total, currency)}
+                  </span>
+                </div>
+                <p className="mb-4 text-xs text-muted-foreground">
+                  Shipping and taxes calculated at checkout.
+                </p>
+                <Button
+                  className="btn-shimmer w-full border-0 text-xs uppercase tracking-wider text-white h-12"
+                  size="lg"
+                  disabled={loading}
+                  onClick={() => {
+                    if (checkoutUrl) window.location.href = checkoutUrl;
+                  }}
+                >
+                  Checkout
+                </Button>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 
@@ -286,7 +319,6 @@ function GiftCartItem({ line }) {
   const image = merchandise.image;
   const originalPrice = merchandise.price;
 
-  // Get gift label from line attributes
   const giftLabel =
     line.attributes?.find((a) => a.key === "_giftLabel")?.value || "Free Gift";
 
@@ -329,13 +361,10 @@ function GiftCartItem({ line }) {
           <div className="flex items-center gap-2">
             {parseFloat(originalPrice.amount) > 0 && (
               <span className="text-xs text-muted-foreground line-through">
-                {formatPrice(
-                  originalPrice.amount,
-                  originalPrice.currencyCode
-                )}
+                {formatPrice(originalPrice.amount, originalPrice.currencyCode)}
               </span>
             )}
-            <span className="text-sm font-medium text-emerald-600">$0.00</span>
+            <span className="text-sm font-medium text-emerald-600">FREE</span>
           </div>
         </div>
       </div>

@@ -33,6 +33,7 @@ const PRODUCT_FRAGMENT = `
     handle
     description
     descriptionHtml
+    availableForSale
     productType
     tags
     priceRange {
@@ -67,6 +68,7 @@ const PRODUCT_FRAGMENT = `
           id
           title
           availableForSale
+          quantityAvailable
           price {
             amount
             currencyCode
@@ -273,6 +275,7 @@ const CART_FRAGMENT = `
                 height
               }
               product {
+                id
                 title
                 handle
                 productType
@@ -285,6 +288,20 @@ const CART_FRAGMENT = `
     }
   }
 `;
+
+export async function getCart(cartId) {
+  const query = `
+    ${CART_FRAGMENT}
+    query GetCart($cartId: ID!) {
+      cart(id: $cartId) {
+        ...CartFields
+      }
+    }
+  `;
+
+  const data = await shopifyFetch({ query, variables: { cartId } });
+  return data.cart;
+}
 
 export async function createCart() {
   const query = `

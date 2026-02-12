@@ -1,140 +1,180 @@
 # Nhiệm vụ 1: Luồng hoạt động (User Flow)
 
 ## Bối cảnh
-Khách hàng vào web shop thời trang, mua Áo Thun (T-Shirt) và được tặng kèm đôi Tất (Socks) miễn phí tự động.
+
+Chủ shop trên Shopify muốn triển khai chương trình khuyến mãi "Buy X Get Y" (Free Gift). Admin cấu hình campaign trên trang admin, chọn sản phẩm trigger và quà tặng. Khách hàng mua sản phẩm đủ điều kiện sẽ được tặng quà miễn phí (hoặc giảm giá).
+
+Có 2 phương thức nhận quà:
+- **Customer Chooses**: Khách tự chọn quà từ popup
+- **Automatically**: Quà tự động thêm vào giỏ
 
 ---
 
-## User Flow chi tiết
+## Flow A: Customer Chooses (Khách tự chọn quà)
 
-### Bước 1: Khách vào trang sản phẩm Áo Thun
+### Bước 1: Khách vào trang sản phẩm (PDP)
 
-- Khách truy cập trang chi tiết sản phẩm (Product Detail Page - PDP)
-- Hiển thị đầy đủ thông tin sản phẩm: hình ảnh, giá, mô tả, variant (size, màu...)
-- **Điểm khác biệt:** Xuất hiện một **banner quà tặng** ngay phía trên nút "Add to Cart":
-  ```
-  ┌────────────────────────────────────────────┐
-  │  🎁 Mua sản phẩm này được TẶNG KÈM       │
-  │     1 đôi Tất Classic miễn phí!           │
-  └────────────────────────────────────────────┘
-  ```
-- Banner này chỉ hiển thị khi:
-  - Rule quà tặng đang **Active**
-  - Sản phẩm hiện tại **match** với trigger rule
-  - Quà tặng **còn hàng** trong kho
+- Hiển thị thông tin sản phẩm bình thường
+- Nếu sản phẩm nằm trong **"Customer buys"** của campaign đang active:
+  - Hiển thị **Promotion Card** (nếu bật trong Widget Setting):
+    ```
+    ┌──────────────────────────────────────────────┐
+    │  🎁 Buy this product and get a FREE gift!    │
+    │     Choose from our selection of gifts.       │
+    └──────────────────────────────────────────────┘
+    ```
 
 ### Bước 2: Khách bấm "Add to Cart"
 
-Khi khách bấm nút "Add to Cart", hệ thống thực hiện tuần tự:
+1. Sản phẩm trigger được thêm vào giỏ hàng
+2. Hệ thống kiểm tra: Khách đã mua đủ **minimum quantity** chưa?
+   - **Chưa đủ**: Không trigger gift. Hiển thị progress: "Mua thêm X sản phẩm để nhận quà tặng!"
+   - **Đã đủ**: Mở **Gift Selection Popup**
 
-1. **Thêm Áo Thun vào giỏ** → Gọi Shopify Cart API `cartLinesAdd`
-2. **Kiểm tra trigger** → App nhận diện Áo Thun là sản phẩm kích hoạt quà tặng
-3. **Kiểm tra tồn kho quà** → App query Shopify để check Tất còn hàng không
-4. **Kết quả:**
-   - **Nếu Tất CÒN HÀNG:** Tự động thêm 1 đôi Tất vào giỏ với giá $0.00 → Mở Cart Drawer
-   - **Nếu Tất HẾT HÀNG:** Chỉ thêm Áo Thun → Mở Cart Drawer + hiện toast thông báo: *"Free gift is currently out of stock"*
+### Bước 3: Gift Selection Popup
 
-### Bước 3: Cart Drawer mở ra
+```
+┌──────────────────────────────────────────────────────┐
+│  🎁 Choose Your Free Gift!                           │
+│  ─────────────────────────────────────────────────   │
+│                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │   IMG    │  │   IMG    │  │   IMG    │           │
+│  │          │  │          │  │          │           │
+│  │ Ski Wax  │  │ Gift Card│  │ Socks   │           │
+│  │ ₫25      │  │ ₫10      │  │ ₫50     │           │
+│  │          │  │          │  │         │           │
+│  │[Add to   ]│  │[Add to   ]│  │[Add to  ]│           │
+│  │[ Cart   ]│  │[ Cart   ]│  │[ Cart  ]│           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+│                                                      │
+│  [Close]                                             │
+└──────────────────────────────────────────────────────┘
+```
 
-Khách thấy giỏ hàng với 2 items (hoặc 1 nếu quà hết hàng):
+- Hiển thị danh sách sản phẩm quà từ config "Customer gets"
+- Mỗi sản phẩm hiển thị: ảnh, tên, giá gốc (gạch ngang), nút "Add to Cart"
+- Khách chọn sản phẩm → quà được thêm vào giỏ với discount đã cấu hình (Free / % / Fixed)
+
+### Bước 4: Cart Drawer hiển thị
 
 ```
 ┌─────────────────────────────────────────┐
 │  🛒 Your Cart                           │
 │                                         │
 │  ┌──────────────────────────────────┐   │
-│  │  [IMG]  Áo Thun Classic          │   │
-│  │         Size: M                  │   │
-│  │         [-] 1 [+]      $25.00 🗑 │   │
+│  │  [IMG]  Snowboard Complete       │   │
+│  │         Variant: Dawn            │   │
+│  │         [-] 2 [+]      ₫1,400 🗑 │   │
 │  └──────────────────────────────────┘   │
 │                                         │
-│  ┌──────────────────────────────────┐   │
-│  │  [IMG]  🎁 Tất Classic           │   │
+│  ┌─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐   │
+│  │  [IMG]  🎁 Selling Plans Ski Wax │   │
 │  │         FREE GIFT                │   │
-│  │         Qty: 1         $0.00     │   │
-│  │  (không có nút +/- và 🗑)        │   │
-│  └──────────────────────────────────┘   │
+│  │         ~~₫25~~ → FREE           │   │
+│  │         Qty: 1 (locked)          │   │
+│  └─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘   │
 │                                         │
-│  Subtotal:                    $25.00    │
-│  Shipping & tax at checkout             │
+│  Discount: GIFT-XXXXXX         -₫25     │
+│  Subtotal:                    ₫1,400    │
 │  [        CHECKOUT         ]            │
 └─────────────────────────────────────────┘
 ```
 
-**Đặc điểm hiển thị quà tặng:**
-- Badge "🎁 FREE GIFT" nổi bật (màu xanh/vàng)
-- Giá hiển thị: $0.00 (hoặc gạch giá gốc ~~$5.00~~ → FREE)
-- **KHÔNG** hiển thị nút tăng/giảm số lượng
-- **KHÔNG** hiển thị nút xóa (🗑)
-- Background/border khác biệt để phân biệt với sản phẩm thường
+---
 
-### Bước 4: Khách thay đổi giỏ hàng
+## Flow B: Automatically (Quà tự động thêm)
+
+### Bước 1-2: Giống Flow A
+
+### Bước 3: Congratulation Bar (thay vì popup)
+
+Khi đủ điều kiện, quà tự động được thêm vào giỏ + hiển thị **Congratulation Bar**:
+
+```
+┌──────────────────────────────────────────────────────┐
+│  🎉 Congratulations! You've earned a FREE gift!      │
+│     Ski Wax has been added to your cart.             │
+│                                              [✕]     │
+└──────────────────────────────────────────────────────┘
+        ↑ Tự động đóng sau 5 giây
+        ↑ Có button ✕ cho phép đóng sớm
+```
+
+- Quà đầu tiên available được tự động thêm
+- Nếu có nhiều gift products: thêm lần lượt theo config
+
+### Bước 4: Cart Drawer hiển thị (giống Flow A)
+
+---
+
+## Flow chung: Thay đổi giỏ hàng
 
 | Hành động | Kết quả |
 |-----------|---------|
-| Tăng SL Áo Thun (1→2) | Tùy cấu hình: giữ 1 Tất (Fixed mode) hoặc tăng lên 2 Tất (Per Item mode) |
-| Giảm SL Áo Thun (2→1) | Tùy cấu hình: giữ 1 Tất hoặc giảm về 1 Tất |
-| Xóa Áo Thun khỏi giỏ | **Tất tự động bị xóa khỏi giỏ** |
-| Thêm sản phẩm khác (không phải trigger) | Không ảnh hưởng đến quà tặng |
-| Cố gắng chỉnh SL quà tặng | Không cho phép (UI không hiển thị nút chỉnh) |
+| Tăng SL trigger product đạt bội số mới (Multi-apply ON) | Thêm quà tặng mới. VD: Buy 2 Get 1, mua 4 → tặng 2 |
+| Tăng SL trigger product (Multi-apply OFF) | Giữ nguyên số quà đã tặng |
+| Giảm SL trigger product xuống dưới minimum | **Tự động xóa quà tặng khỏi giỏ** |
+| Xóa trigger product hoàn toàn | **Tự động xóa quà tặng khỏi giỏ** |
+| Cố chỉnh SL quà tặng | Không cho phép (UI locked) |
+| Cố xóa quà tặng | Không cho phép (ẩn nút xóa) |
 
-### Bước 5: Khách bấm "Checkout"
+## Flow: Campaign hết hạn / inactive
 
-- Redirect tới Shopify Hosted Checkout
-- Giỏ hàng chuyển đi gồm: Áo Thun (giá đầy đủ) + Tất ($0.00)
-- Shopify xử lý thanh toán, shipping, tax bình thường
-- Khách thanh toán và hoàn tất đơn hàng
+| Tình huống | Xử lý |
+|-----------|-------|
+| Campaign chưa bắt đầu (schedule) | Không hiển thị promotion card, không trigger gift |
+| Campaign đã hết hạn (end date đã qua) | Như trên |
+| Campaign bị admin tắt | Như trên |
+| Gift product hết hàng + auto-disable ON | Tự động tắt promotion card, không trigger gift |
+| Gift product hết hàng + auto-disable OFF | Ẩn sản phẩm hết hàng khỏi popup, SP khác vẫn hiển thị |
 
 ---
 
 ## Sơ đồ Flow tổng quát
 
 ```
-Khách vào PDP (Áo Thun)
-       │
-       ▼
-  Thấy banner quà tặng
-       │
-       ▼
-  Bấm "Add to Cart"
-       │
-       ├── Thêm Áo Thun vào Cart ────────────────────┐
-       │                                               │
-       ▼                                               ▼
-  Check quà còn hàng?                           Cart Drawer mở
-       │                                               │
-   ┌───┴───┐                                           │
-   │       │                                           │
-  YES     NO                                           │
-   │       │                                           │
-   ▼       ▼                                           │
- Thêm   Toast                                         │
- Tất    "hết quà"                                     │
- $0.00    │                                            │
-   │      │                                            │
-   └──────┴────────────────────────────────────────────┘
-                        │
-                        ▼
-              Khách xem giỏ hàng
-                        │
-            ┌───────────┼───────────┐
-            │           │           │
-            ▼           ▼           ▼
-        Xóa Áo     Đổi SL Áo   Checkout
-            │           │           │
-            ▼           ▼           ▼
-      Auto xóa    Recalc gift   Shopify
-        Tất        quantity     Checkout
+Khách vào PDP
+     │
+     ▼
+Campaign active + SP trong "Customer buys"?
+     │
+  ┌──┴──┐
+  NO   YES
+  │     │
+  ▼     ▼
+Normal  Hiển thị Promotion Card
+  │     │
+  ▼     ▼
+Add to Cart
+     │
+     ▼
+Đủ minimum quantity?
+     │
+  ┌──┴──┐
+  NO   YES
+  │     │
+  ▼     ▼
+Show   Widget mode?
+progress   │
+     ┌─────┴─────┐
+     │           │
+  Customer   Automatic
+  Chooses       │
+     │           ▼
+     ▼      Auto-add gift
+  Gift      + Congrats bar
+  Popup     (5s auto-close)
+     │           │
+     ▼           ▼
+  Pick gift     │
+     │           │
+     └─────┬─────┘
+           ▼
+    Cart Drawer hiển thị
+    (gift marked as FREE)
+           │
+           ▼
+    Checkout (Shopify)
+    Discount code applied
 ```
-
----
-
-## Edge Cases
-
-| # | Tình huống | Xử lý |
-|---|-----------|-------|
-| 1 | Khách Quick Add từ Product Grid (không vào PDP) | Vẫn trigger quà tặng bình thường |
-| 2 | Khách add Áo Thun 2 lần liên tiếp | Lần 2 chỉ tăng SL Áo, quà tặng recalculate theo config |
-| 3 | Khách refresh trang khi đã có giỏ hàng | Cart restore từ localStorage, quà tặng vẫn giữ nguyên |
-| 4 | Quà hết hàng SAU KHI đã thêm vào giỏ | Giữ nguyên trong giỏ (đã được "reserve" bởi Shopify Cart) |
-| 5 | Nhiều rule quà tặng cùng lúc | Phase 1: Chỉ hỗ trợ 1 rule. Phase 2: Mở rộng nhiều rule |

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Admin | Free Gift Configuration",
+  title: "Admin | Shopify",
 };
 
 export default function AdminLayout({ children }) {

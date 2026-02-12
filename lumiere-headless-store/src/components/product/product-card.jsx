@@ -1,11 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/shopify";
 import useCartStore from "@/store/cart-store";
+import PromotionBadge from "@/components/gift/promotion-badge";
+import {
+  getFreeGiftConfig,
+  isCampaignActive,
+  isProductInBuyCondition,
+} from "@/lib/free-gift";
 
 export default function ProductCard({ product }) {
   const image = product.images.edges[0]?.node;
@@ -23,6 +30,19 @@ export default function ProductCard({ product }) {
 
   const firstVariantId = product.variants.edges[0]?.node?.id;
   const { addItem } = useCartStore();
+
+  // Check if this product qualifies for promotion badge
+  const [badgeText, setBadgeText] = useState(null);
+  useEffect(() => {
+    const config = getFreeGiftConfig();
+    if (
+      isCampaignActive(config) &&
+      config.promotionBadgeEnabled &&
+      isProductInBuyCondition(product, config)
+    ) {
+      setBadgeText(config.promotionBadgeText || "FREE GIFT");
+    }
+  }, [product]);
 
   const handleQuickAdd = (e) => {
     e.preventDefault();
@@ -76,11 +96,18 @@ export default function ProductCard({ product }) {
           </Badge>
         )}
 
+        {/* Promotion badge */}
+        {badgeText && (
+          <div className="absolute bottom-3 left-3 z-0">
+            <PromotionBadge text={badgeText} />
+          </div>
+        )}
+
         {/* Quick add overlay */}
         {firstVariantId && (
           <button
             onClick={handleQuickAdd}
-            className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 rounded bg-background/90 py-2.5 text-xs font-medium uppercase tracking-wider opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-background group-hover:opacity-100"
+            className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-center gap-2 rounded bg-background/90 py-2.5 text-xs font-medium uppercase tracking-wider opacity-0 backdrop-blur-sm transition-all duration-300 hover:bg-background group-hover:opacity-100"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             Quick Add
