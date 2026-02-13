@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Page,
+  Layout,
   Tabs,
   Button,
   Banner,
@@ -236,7 +237,7 @@ function AutomaticallyPreview() {
       </div>
 
       {/* Spacer to push bar to bottom */}
-      <div style={{ height: 40 }} />
+      <div style={{ height: 60 }} />
 
       {/* Congratulation bar */}
       <div
@@ -710,31 +711,25 @@ function CampaignEditor({ onBack }) {
           <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab}>
             <Box paddingBlockStart="400">
               {selectedTab === 0 && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr",
-                    gap: "16px",
-                    alignItems: "start",
-                  }}
-                >
-                  <CampaignSetting />
-                  <CampaignSummary />
-                </div>
+                <Layout>
+                  <Layout.Section>
+                    <CampaignSetting />
+                  </Layout.Section>
+                  <Layout.Section variant="oneThird">
+                    <CampaignSummary />
+                  </Layout.Section>
+                </Layout>
               )}
 
               {selectedTab === 1 && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr",
-                    gap: "16px",
-                    alignItems: "start",
-                  }}
-                >
-                  <WidgetSetting />
-                  <WidgetPreview />
-                </div>
+                <Layout>
+                  <Layout.Section>
+                    <WidgetSetting />
+                  </Layout.Section>
+                  <Layout.Section variant="oneThird">
+                    <WidgetPreview />
+                  </Layout.Section>
+                </Layout>
               )}
             </Box>
           </Tabs>

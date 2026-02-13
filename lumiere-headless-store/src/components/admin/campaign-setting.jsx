@@ -461,7 +461,6 @@ export default function CampaignSetting() {
 
           {/* Customer Eligibility */}
           <Select
-          disabled
             label="Customer eligibility"
             options={[
               { label: "All customers", value: "allCustomers" },

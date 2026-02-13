@@ -12,6 +12,7 @@ async function shopifyFetch({ query, variables = {} }) {
       "X-Shopify-Storefront-Access-Token": storefrontAccessToken,
     },
     body: JSON.stringify({ query, variables }),
+    next: { revalidate: 60 },
   });
 
   const json = await response.json();

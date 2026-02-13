@@ -1,4 +1,4 @@
-import ProductGrid from "@/components/product/product-grid";
+import ProductListWithPagination from "@/components/product/product-list-with-pagination";
 import { FadeIn } from "@/components/motion/motion-wrapper";
 import { getProducts } from "@/lib/shopify";
 
@@ -10,10 +10,12 @@ export const metadata = {
 
 export default async function ProductsPage() {
   let products = [];
+  let pageInfo = { hasNextPage: false, endCursor: null };
 
   try {
     const data = await getProducts({ first: 24 });
     products = data.products;
+    pageInfo = data.pageInfo;
   } catch (e) {
     console.error("Failed to fetch products:", e);
   }
@@ -35,7 +37,10 @@ export default async function ProductsPage() {
         </div>
       </FadeIn>
 
-      <ProductGrid products={products} />
+      <ProductListWithPagination
+        initialProducts={products}
+        initialPageInfo={pageInfo}
+      />
     </div>
   );
 }
