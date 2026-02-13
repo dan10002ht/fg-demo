@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Shirt,
@@ -30,13 +31,19 @@ export default async function HomePage() {
     <>
       {/* Hero Section */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4">
-        {/* Layered background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-secondary/40 via-background to-background" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(196,168,130,0.08),transparent_70%)]" />
+        {/* Background image */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/back-to-the-city.avif"
+          alt="Premium fashion collection"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/40" />
 
         <div className="relative mx-auto max-w-3xl text-center">
           <FadeIn delay={0.1}>
-            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-muted-foreground">
+            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-white/70">
               Premium Fashion & Apparel
             </p>
           </FadeIn>
@@ -44,14 +51,14 @@ export default async function HomePage() {
           {/* Decorative ornament */}
           <FadeIn delay={0.2}>
             <div className="mx-auto mb-6 flex items-center justify-center gap-3">
-              <div className="h-px w-12 bg-warm/50" />
-              <div className="h-1.5 w-1.5 rotate-45 bg-warm/50" />
-              <div className="h-px w-12 bg-warm/50" />
+              <div className="h-px w-12 bg-white/40" />
+              <div className="h-1.5 w-1.5 rotate-45 bg-white/40" />
+              <div className="h-px w-12 bg-white/40" />
             </div>
           </FadeIn>
 
           <FadeIn delay={0.3}>
-            <h2 className="font-serif text-5xl font-light leading-tight tracking-wide sm:text-6xl lg:text-7xl">
+            <h2 className="font-serif text-5xl font-light leading-tight tracking-wide text-white sm:text-6xl lg:text-7xl">
               Elevate
               <br />
               Your Style
@@ -59,7 +66,7 @@ export default async function HomePage() {
           </FadeIn>
 
           <FadeIn delay={0.5}>
-            <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
+            <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/70">
               Discover our curated collection of premium clothing and
               accessories, designed for the modern lifestyle.
             </p>
@@ -70,7 +77,7 @@ export default async function HomePage() {
               <Button
                 asChild
                 size="lg"
-                className="h-12 bg-foreground px-10 text-xs uppercase tracking-wider text-background hover:bg-foreground/90"
+                className="h-12 bg-white px-10 text-xs uppercase tracking-wider text-black hover:bg-white/90"
               >
                 <Link href="/products">Shop Now</Link>
               </Button>
@@ -78,7 +85,7 @@ export default async function HomePage() {
                 asChild
                 variant="ghost"
                 size="lg"
-                className="h-12 px-10 text-xs uppercase tracking-wider hover:bg-warm/10 hover:text-warm"
+                className="h-12 border border-white/30 px-10 text-xs uppercase tracking-wider text-white hover:bg-white/10"
               >
                 <Link href="/products">New Arrivals</Link>
               </Button>
