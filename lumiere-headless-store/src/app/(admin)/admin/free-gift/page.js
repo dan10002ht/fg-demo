@@ -17,6 +17,7 @@ import {
   EmptyState,
   Popover,
   ActionList,
+  Modal,
 } from "@shopify/polaris";
 import { EditIcon, DeleteIcon } from "@shopify/polaris-icons";
 import "@shopify/polaris/build/esm/styles.css";
@@ -206,16 +207,38 @@ function CustomerChoosesPreview() {
     : [{ id: "preview-1", title: "Gift Product", imageUrl: null, price: 786, currencyCode: "USD" }];
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", minHeight: 420 }}>
       <StoreHeader />
       <PDPSkeleton />
-      <GiftPopupContent
-        title={popupTitle}
-        description={popupDescription}
-        gifts={previewGifts}
-        selectedId={previewGifts[0]?.id}
-        interactive={false}
-      />
+
+      {/* Extra skeleton content to fill background */}
+      <div style={{ padding: "0 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ width: "100%", height: 80, background: "#e5e5e5", borderRadius: 8 }} />
+        <PSkel w="90%" h={69} />
+        <PSkel w="60%" h={50} />
+      </div>
+
+      {/* Popup — bottom sheet, full width */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: "#fff",
+          borderRadius: "14px 14px 0 0",
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.12)",
+          zIndex: 10,
+        }}
+      >
+        <GiftPopupContent
+          title={popupTitle}
+          description={popupDescription}
+          gifts={previewGifts}
+          selectedId={previewGifts[0]?.id}
+          interactive={false}
+        />
+      </div>
     </div>
   );
 }
@@ -225,33 +248,32 @@ function AutomaticallyPreview() {
   const congratsBarTitle = useCampaignStore((s) => s.congratsBarTitle);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", minHeight: 420, display: "flex", flexDirection: "column" }}>
       <StoreHeader />
       <PDPSkeleton />
 
       {/* Extra description skeleton area */}
       <div style={{ padding: "0 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{ width: "100%", height: 80, background: "#e5e5e5", borderRadius: 8 }} />
-        <PSkel w="90%" h={10} />
-        <PSkel w="60%" h={10} />
+     <div style={{height: 75}}/>
       </div>
 
-      {/* Spacer to push bar to bottom */}
-      <div style={{ height: 60 }} />
+      {/* Spacer pushes bar to bottom */}
+      <div style={{ flex: 1 }} />
 
-      {/* Congratulation bar */}
+      {/* Congratulation bar — pinned to bottom */}
       <div
         style={{
-          margin: "0 10px 12px",
+          margin: "0 10px 0",
           padding: "12px 14px",
           background: "#ffe0e0",
-          borderRadius: 12,
+          borderRadius: "12px 12px 0 0",
           display: "flex",
           alignItems: "center",
           gap: 10,
+          boxShadow: "0 -2px 8px rgba(0,0,0,0.06)",
         }}
       >
-        {/* Gift icon */}
         <span style={{ fontSize: 20, flexShrink: 0 }}>{"\uD83C\uDF81"}</span>
         <div style={{ flex: 1, fontSize: 11, color: "#8b0000", fontWeight: 600, lineHeight: "15px" }}>
           {congratsBarTitle}
@@ -262,41 +284,271 @@ function AutomaticallyPreview() {
   );
 }
 
+/* ─── Desktop Store Header ─── */
+function DesktopStoreHeader() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "14px 32px",
+        background: "#f5f5f5",
+        borderBottom: "1px solid #e5e5e5",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        <div style={{ width: 32, height: 32, background: "#ccc", borderRadius: 16 }} />
+        <div style={{ display: "flex", gap: 20 }}>
+          {["Home", "Shop", "Collections", "About"].map((item) => (
+            <span key={item} style={{ fontSize: 12, color: "#666", fontWeight: 500 }}>{item}</span>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+          <circle cx="9" cy="9" r="6" stroke="#666" strokeWidth="1.5" />
+          <path d="M13.5 13.5L17 17" stroke="#666" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="7" r="3.5" stroke="#666" strokeWidth="1.5" />
+          <path d="M3 17.5C3 14 6 12 10 12C14 12 17 14 17 17.5" stroke="#666" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <div style={{ position: "relative" }}>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <path d="M4 4H5.5L7.5 14H15" stroke="#666" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="8.5" cy="17" r="1.2" fill="#666" />
+            <circle cx="14" cy="17" r="1.2" fill="#666" />
+            <path d="M6 6.5H16.5L15 12H7.5" stroke="#666" strokeWidth="1.5" />
+          </svg>
+          <span
+            style={{
+              position: "absolute", top: -4, right: -6,
+              width: 14, height: 14, borderRadius: 7,
+              background: "#222", color: "#fff",
+              fontSize: 8, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            2
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Desktop PDP skeleton (2-column layout) ─── */
+function DesktopPDPSkeleton() {
+  return (
+    <div style={{ display: "flex", gap: 32, padding: 32 }}>
+      {/* Left: product image */}
+      <div style={{ flex: 1 }}>
+        <div style={{ width: "100%", aspectRatio: "1/1", background: "#e5e5e5", borderRadius: 8 }} />
+        {/* Thumbnail row */}
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} style={{ width: 60, height: 60, background: "#e5e5e5", borderRadius: 6 }} />
+          ))}
+        </div>
+      </div>
+      {/* Right: product info */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+        <PSkel w="40%" h={10} />
+        <PSkel w="80%" h={18} />
+        <PSkel w={70} h={14} />
+        <div style={{ marginTop: 4 }}>
+          <PSkel w="100%" h={10} />
+          <div style={{ height: 6 }} />
+          <PSkel w="90%" h={10} />
+          <div style={{ height: 6 }} />
+          <PSkel w="65%" h={10} />
+        </div>
+        {/* Qty selector */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 16, border: "1px solid #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#666" }}>-</div>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>1</span>
+          <div style={{ width: 32, height: 32, borderRadius: 16, border: "1px solid #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#666" }}>+</div>
+        </div>
+        {/* Add to cart button skeleton */}
+        <div style={{ width: "100%", height: 44, background: "#222", borderRadius: 8, marginTop: 8 }} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── Desktop Customer Chooses Preview ─── */
+function DesktopCustomerChoosesPreview() {
+  const popupTitle = useCampaignStore((s) => s.popupTitle);
+  const popupDescription = useCampaignStore((s) => s.popupDescription);
+  const getProducts = useCampaignStore((s) => s.getProducts);
+
+  const previewGifts = getProducts?.length > 0
+    ? getProducts.map((p) => ({
+        id: p.productId || p.title,
+        title: p.title || "Gift Product",
+        imageUrl: p.imageUrl || null,
+        price: parseFloat(p.price || 0),
+        currencyCode: "USD",
+      }))
+    : [{ id: "preview-1", title: "Gift Product", imageUrl: null, price: 786, currencyCode: "USD" }];
+
+  return (
+    <div style={{ position: "relative", minHeight: 500 }}>
+      <DesktopStoreHeader />
+      <DesktopPDPSkeleton />
+
+      {/* Popup overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.3)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 380,
+            maxWidth: "90%",
+            background: "#fff",
+            borderRadius: 16,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+            overflow: "hidden",
+          }}
+        >
+          <GiftPopupContent
+            title={popupTitle}
+            description={popupDescription}
+            gifts={previewGifts}
+            selectedId={previewGifts[0]?.id}
+            interactive={false}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Desktop Automatically Preview ─── */
+function DesktopAutomaticallyPreview() {
+  const congratsBarTitle = useCampaignStore((s) => s.congratsBarTitle);
+
+  return (
+    <div style={{ position: "relative", minHeight: 500 }}>
+      <DesktopStoreHeader />
+      <DesktopPDPSkeleton />
+
+      {/* Congrats bar — sticky bottom */}
+      <div
+        style={{
+          position: "sticky",
+          bottom: 0,
+          margin: "0 32px 0",
+          padding: "14px 18px",
+          background: "#ffe0e0",
+          borderRadius: "12px 12px 0 0",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          boxShadow: "0 -2px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        <span style={{ fontSize: 22, flexShrink: 0 }}>{"\uD83C\uDF81"}</span>
+        <div style={{ flex: 1, fontSize: 13, color: "#8b0000", fontWeight: 600, lineHeight: "18px" }}>
+          {congratsBarTitle}
+        </div>
+        <span style={{ fontSize: 15, color: "#8b0000", cursor: "default", flexShrink: 0 }}>&times;</span>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Widget Preview Sidebar ─── */
 function WidgetPreview() {
   const giftSelectionMethod = useCampaignStore((s) => s.giftSelectionMethod);
+  const [desktopPreviewOpen, setDesktopPreviewOpen] = useState(false);
 
   return (
-    <Card>
-      <BlockStack gap="400">
-        <InlineStack align="space-between" blockAlign="center">
-          <Text as="h2" variant="headingMd">
-            Preview
-          </Text>
-          {/* Device icon */}
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <rect x="5" y="2" width="10" height="16" rx="1.5" stroke="#666" strokeWidth="1.5" />
-            <circle cx="10" cy="15.5" r="0.75" fill="#666" />
-          </svg>
-        </InlineStack>
+    <>
+      <Card>
+        <BlockStack gap="400">
+          <InlineStack align="space-between" blockAlign="center">
+            <Text as="h2" variant="headingMd">
+              Preview
+            </Text>
+            {/* Desktop preview icon */}
+            <button
+              onClick={() => setDesktopPreviewOpen(true)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                borderRadius: 4,
+                display: "flex",
+                alignItems: "center",
+                opacity: 0.6,
+                transition: "opacity 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.6")}
+              title="Desktop preview"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="3" width="16" height="11" rx="1.5" stroke="#666" strokeWidth="1.5" />
+                <path d="M7 17H13" stroke="#666" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M10 14V17" stroke="#666" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </InlineStack>
 
-        {/* Phone frame */}
-        <div
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: 16,
-            overflow: "hidden",
-            background: "#fff",
-          }}
-        >
-          {giftSelectionMethod === "customerChooses" ? (
-            <CustomerChoosesPreview />
-          ) : (
-            <AutomaticallyPreview />
-          )}
-        </div>
-      </BlockStack>
-    </Card>
+          {/* Phone frame */}
+          <div
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: 16,
+              overflow: "hidden",
+              background: "#fff",
+            }}
+          >
+            {giftSelectionMethod === "customerChooses" ? (
+              <CustomerChoosesPreview />
+            ) : (
+              <AutomaticallyPreview />
+            )}
+          </div>
+        </BlockStack>
+      </Card>
+
+      {/* Desktop Preview Modal */}
+      <Modal
+        open={desktopPreviewOpen}
+        onClose={() => setDesktopPreviewOpen(false)}
+        title="Desktop Preview"
+        size="large"
+      >
+        <Modal.Section>
+          <div
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: 8,
+              overflow: "hidden",
+              background: "#fff",
+            }}
+          >
+            {giftSelectionMethod === "customerChooses" ? (
+              <DesktopCustomerChoosesPreview />
+            ) : (
+              <DesktopAutomaticallyPreview />
+            )}
+          </div>
+        </Modal.Section>
+      </Modal>
+    </>
   );
 }
 

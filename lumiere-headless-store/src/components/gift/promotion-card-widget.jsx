@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Gift, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/shopify";
+
+const slideVariants = {
+  enter: (direction) => ({ x: direction > 0 ? 80 : -80, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction) => ({ x: direction > 0 ? -80 : 80, opacity: 0 }),
+};
 
 /**
  * Shared promotion card widget used by both admin preview and storefront PDP.
@@ -13,6 +20,7 @@ import { formatPrice } from "@/lib/shopify";
  * @param {string}  ctaText        — CTA button label
  * @param {Array}   gifts          — Array of gift objects { title, imageUrl, price, currencyCode }
  * @param {Function} onCtaClick    — Optional callback for CTA
+ * @param {number}  autoSlideInterval — ms between auto-slides (default 4000, 0 to disable)
  */
 export default function PromotionCardWidget({
   title = "EXCLUSIVE GIFTS!",
@@ -20,16 +28,44 @@ export default function PromotionCardWidget({
   ctaText = "Unlock Your Gift",
   gifts = [],
   onCtaClick,
+  autoSlideInterval = 4000,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const timerRef = useRef(null);
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (autoSlideInterval > 0 && gifts.length > 1) {
+      timerRef.current = setInterval(() => {
+        setDirection(1);
+        setActiveIndex((i) => (i + 1) % gifts.length);
+      }, autoSlideInterval);
+    }
+  }, [autoSlideInterval, gifts.length]);
+
+  useEffect(() => {
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [resetTimer]);
 
   const goNext = useCallback(() => {
+    setDirection(1);
     setActiveIndex((i) => (i + 1) % gifts.length);
-  }, [gifts.length]);
+    resetTimer();
+  }, [gifts.length, resetTimer]);
 
   const goPrev = useCallback(() => {
+    setDirection(-1);
     setActiveIndex((i) => (i - 1 + gifts.length) % gifts.length);
-  }, [gifts.length]);
+    resetTimer();
+  }, [gifts.length, resetTimer]);
+
+  const goTo = useCallback((idx) => {
+    setDirection(idx > activeIndex ? 1 : -1);
+    setActiveIndex(idx);
+    resetTimer();
+  }, [activeIndex, resetTimer]);
 
   if (gifts.length === 0) return null;
 
@@ -62,57 +98,70 @@ export default function PromotionCardWidget({
           </button>
         )}
 
-        {/* Active gift */}
-        <div className="flex flex-1 items-center gap-3">
-          <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 border-foreground/80 bg-muted">
-            {activeGift.imageUrl ? (
-              <Image
-                src={activeGift.imageUrl}
-                alt={activeGift.title}
-                fill
-                className="object-cover"
-                sizes="56px"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <Gift className="h-6 w-6 text-muted-foreground" />
+        {/* Active gift — animated */}
+        <div className="relative flex-1 overflow-hidden">
+          <AnimatePresence initial={false} custom={direction} mode="wait">
+            <motion.div
+              key={activeIndex}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="flex items-center gap-3"
+            >
+              <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 border-foreground/80 bg-muted">
+                {activeGift.imageUrl ? (
+                  <Image
+                    src={activeGift.imageUrl}
+                    alt={activeGift.title}
+                    fill
+                    className="object-cover"
+                    sizes="56px"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Gift className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-foreground">
-              {activeGift.title}
-            </p>
-            <div className="mt-0.5 flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-foreground">
-                {formatPrice(0, activeGift.currencyCode || "USD")}
-              </span>
-              {activeGift.price > 0 && (
-                <span className="text-xs text-muted-foreground line-through">
-                  {formatPrice(activeGift.price, activeGift.currencyCode || "USD")}
-                </span>
-              )}
-            </div>
-          </div>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium text-foreground">
+                  {activeGift.title}
+                </p>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-foreground">
+                    {formatPrice(0, activeGift.currencyCode || "USD")}
+                  </span>
+                  {activeGift.price > 0 && (
+                    <span className="text-xs text-muted-foreground line-through">
+                      {formatPrice(activeGift.price, activeGift.currencyCode || "USD")}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-          {/* Faded next gift preview */}
-          {nextGift && (
-            <div className="relative ml-auto h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-muted opacity-40">
-              {nextGift.imageUrl ? (
-                <Image
-                  src={nextGift.imageUrl}
-                  alt={nextGift.title}
-                  fill
-                  className="object-cover"
-                  sizes="48px"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <Gift className="h-5 w-5 text-muted-foreground" />
+              {/* Faded next gift preview */}
+              {nextGift && (
+                <div className="relative ml-auto h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-muted opacity-40">
+                  {nextGift.imageUrl ? (
+                    <Image
+                      src={nextGift.imageUrl}
+                      alt={nextGift.title}
+                      fill
+                      className="object-cover"
+                      sizes="48px"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Gift className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Next arrow */}
@@ -133,7 +182,7 @@ export default function PromotionCardWidget({
           {gifts.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => setActiveIndex(idx)}
+              onClick={() => goTo(idx)}
               className={`h-1.5 rounded-full transition-all ${
                 idx === activeIndex
                   ? "w-4 bg-foreground"

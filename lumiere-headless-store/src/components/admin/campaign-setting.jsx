@@ -14,7 +14,7 @@ import {
   Thumbnail,
   Icon,
 } from "@shopify/polaris";
-import { DeleteIcon, PlusIcon } from "@shopify/polaris-icons";
+import { DeleteIcon } from "@shopify/polaris-icons";
 import useCampaignStore from "@/lib/campaign-store";
 import { formatPrice } from "@/lib/shopify";
 import OfferTitleModal from "./offer-title-modal";
@@ -76,13 +76,25 @@ export default function CampaignSetting() {
     [browseMode, buyConditionType, getProducts, setField]
   );
 
-  const browseButtonLabel =
-    buyConditionType === "specificCollections"
-      ? "Browse collections"
-      : "Browse products";
-
   return (
     <BlockStack gap="400">
+      {/* Fix native date/time input: spread text & icon across full width */}
+      <style>{`
+        input[type="date"],
+        input[type="time"] {
+          display: flex !important;
+          width: 100% !important;
+        }
+        input[type="date"]::-webkit-datetime-edit,
+        input[type="time"]::-webkit-datetime-edit {
+          flex: 1 !important;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+          margin-left: auto !important;
+        }
+      `}</style>
+
       {/* ── Schedule ── */}
       <Card>
         <BlockStack gap="400">
@@ -174,9 +186,18 @@ export default function CampaignSetting() {
                 />
               </div>
             </InlineStack>
-            <Button icon={PlusIcon} onClick={() => openBrowseModal("buy")}>
-              {browseButtonLabel}
-            </Button>
+            <TextField
+              label={buyConditionType === "specificCollections" ? "Collections" : "Products"}
+              labelHidden
+              placeholder={buyConditionType === "specificCollections" ? "Search collections" : "Search products"}
+              autoComplete="off"
+              onFocus={() => openBrowseModal("buy")}
+              connectedRight={
+                <Button onClick={() => openBrowseModal("buy")}>
+                  Browse
+                </Button>
+              }
+            />
 
             {buyConditionType === "specificCollections"
               ? buyCollections.length > 0 && (
@@ -289,9 +310,18 @@ export default function CampaignSetting() {
             <Text as="h3" variant="headingSm">
               Customer gets
             </Text>
-            <Button icon={PlusIcon} onClick={() => openBrowseModal("gift")}>
-              Browse products
-            </Button>
+            <TextField
+              label="Gift products"
+              labelHidden
+              placeholder="Search products"
+              autoComplete="off"
+              onFocus={() => openBrowseModal("gift")}
+              connectedRight={
+                <Button onClick={() => openBrowseModal("gift")}>
+                  Browse
+                </Button>
+              }
+            />
 
             {getProducts.length > 0 && (
               <div style={{ border: "1px solid var(--p-color-border)", borderRadius: "var(--p-border-radius-300)", overflow: "hidden" }}>
