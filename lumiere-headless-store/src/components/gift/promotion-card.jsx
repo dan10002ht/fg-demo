@@ -8,15 +8,12 @@ import {
   isProductInBuyCondition,
   getAvailableGifts,
 } from "@/lib/free-gift";
-import useCartStore from "@/store/cart-store";
 import PromotionCardWidget from "@/components/gift/promotion-card-widget";
 
 export default function PromotionCard({ product }) {
   const [visible, setVisible] = useState(false);
   const [config, setConfig] = useState(null);
   const [gifts, setGifts] = useState([]);
-  const addItem = useCartStore((s) => s.addItem);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -71,10 +68,11 @@ export default function PromotionCard({ product }) {
       : "Buy this product to receive a gift";
 
   const handleCta = () => {
-    // Add trigger product to cart (first variant) — triggers gift flow
-    const firstVariantId = product?.variants?.edges?.[0]?.node?.id;
-    if (firstVariantId) {
-      addItem(firstVariantId);
+    // Scroll to Add to Cart button so user can choose variant/quantity
+    const btn = document.getElementById("add-to-cart-btn");
+    if (btn) {
+      btn.scrollIntoView({ behavior: "smooth", block: "center" });
+      btn.focus();
     }
   };
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, Text, Badge, BlockStack, InlineStack, Divider } from "@shopify/polaris";
+import { Card, Text, Button, BlockStack, InlineStack, Divider } from "@shopify/polaris";
+import { ViewIcon } from "@shopify/polaris-icons";
 import useCampaignStore from "@/lib/campaign-store";
 
 export default function CampaignSummary() {
-  const isActive = useCampaignStore((s) => s.isActive);
   const startDate = useCampaignStore((s) => s.startDate);
   const startTime = useCampaignStore((s) => s.startTime);
   const hasEndDate = useCampaignStore((s) => s.hasEndDate);
@@ -59,9 +59,20 @@ export default function CampaignSummary() {
           <Text as="h2" variant="headingMd">
             Summary
           </Text>
-          <Badge tone={isActive ? "success" : "critical"}>
-            {isActive ? "Active" : "Inactive"}
-          </Badge>
+          {buyProducts.length > 0 ? (
+            <Button
+              size="slim"
+              icon={ViewIcon}
+              url={`/products/${buyProducts[0].handle}`}
+              target="_blank"
+            >
+              Preview
+            </Button>
+          ) : (
+            <Button size="slim" icon={ViewIcon} disabled>
+              Preview
+            </Button>
+          )}
         </InlineStack>
 
         <Divider />

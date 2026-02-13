@@ -132,7 +132,7 @@ const useCartStore = create((set, get) => ({
       // Check widget mode
       if (config.giftSelectionMethod === "customerChooses") {
         // Show popup for customer to pick
-        set({ showGiftPopup: true, availableGifts: gifts });
+        set({ showGiftPopup: true, availableGifts: gifts, isOpen: false });
         return cart;
       }
 

@@ -140,6 +140,7 @@ export default function ProductInfo({ product }) {
 
       {/* Add to cart */}
       <Button
+        id="add-to-cart-btn"
         onClick={handleAddToCart}
         disabled={loading || !selectedVariant?.availableForSale}
         className="w-full bg-foreground text-background hover:bg-foreground/90 h-12 text-xs uppercase tracking-wider"

@@ -15,7 +15,6 @@ import {
 } from "@shopify/polaris";
 import { ViewIcon } from "@shopify/polaris-icons";
 import useCampaignStore from "@/lib/campaign-store";
-import PromotionCardWidget from "@/components/gift/promotion-card-widget";
 import PromotionBadge from "@/components/gift/promotion-badge";
 
 /* ─── Skeleton bar helper ─── */
@@ -29,6 +28,222 @@ function Skel({ w = "100%", h = 12, r = 4 }) {
         borderRadius: r,
       }}
     />
+  );
+}
+
+/* ─── Inline Promotion Card (immune to Polaris CSS) ─── */
+function formatPreviewPrice(amount, currency = "USD") {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
+}
+
+function PromotionCardInline({ title, subtitle, gifts = [] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  if (gifts.length === 0) return null;
+
+  const activeGift = gifts[activeIndex];
+  const nextGift = gifts.length > 1 ? gifts[(activeIndex + 1) % gifts.length] : null;
+
+  const goNext = () => setActiveIndex((i) => (i + 1) % gifts.length);
+  const goPrev = () => setActiveIndex((i) => (i - 1 + gifts.length) % gifts.length);
+
+  const arrowStyle = {
+    width: 28,
+    height: 28,
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "50%",
+    border: "none",
+    background: "transparent",
+    color: "#888",
+    cursor: "pointer",
+    padding: 0,
+  };
+
+  return (
+    <div
+      style={{
+        border: "1px solid #e5e5e5",
+        borderRadius: 12,
+        background: "rgba(245,245,245,0.4)",
+        padding: 16,
+      }}
+    >
+      {/* Title + Subtitle */}
+      <div style={{ marginBottom: 12 }}>
+        <p
+          style={{
+            fontSize: 14,
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            color: "#111",
+            margin: 0,
+          }}
+        >
+          {title}
+        </p>
+        {subtitle && (
+          <p style={{ fontSize: 12, color: "#888", marginTop: 2, margin: 0, paddingTop: 2 }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
+
+      {/* Carousel */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {gifts.length > 1 && (
+          <button type="button" onClick={goPrev} style={arrowStyle} aria-label="Previous gift">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        )}
+
+        <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12 }}>
+          {/* Active gift image */}
+          <div
+            style={{
+              position: "relative",
+              width: 56,
+              height: 56,
+              flexShrink: 0,
+              overflow: "hidden",
+              borderRadius: 8,
+              border: "2px solid rgba(17,17,17,0.8)",
+              background: "#f0f0f0",
+            }}
+          >
+            {activeGift.imageUrl ? (
+              <img
+                src={activeGift.imageUrl}
+                alt={activeGift.title}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              />
+            ) : (
+              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="8" width="18" height="13" rx="2" />
+                  <path d="M12 8V5a3 3 0 0 0-3-3h0a3 3 0 0 0-3 3v3M18 8V5a3 3 0 0 0-3-3h0a3 3 0 0 0-3 3v3" />
+                </svg>
+              </div>
+            )}
+          </div>
+
+          {/* Gift info */}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "#111",
+                margin: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {activeGift.title}
+            </p>
+            <div style={{ marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#111" }}>
+                {formatPreviewPrice(0, activeGift.currencyCode || "USD")}
+              </span>
+              {activeGift.price > 0 && (
+                <span style={{ fontSize: 12, color: "#888", textDecoration: "line-through" }}>
+                  {formatPreviewPrice(activeGift.price, activeGift.currencyCode || "USD")}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Next gift (faded) */}
+          {nextGift && (
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                flexShrink: 0,
+                overflow: "hidden",
+                borderRadius: 8,
+                background: "#f0f0f0",
+                opacity: 0.4,
+                marginLeft: "auto",
+              }}
+            >
+              {nextGift.imageUrl ? (
+                <img
+                  src={nextGift.imageUrl}
+                  alt={nextGift.title}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+              ) : (
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="8" width="18" height="13" rx="2" />
+                    <path d="M12 8V5a3 3 0 0 0-3-3h0a3 3 0 0 0-3 3v3M18 8V5a3 3 0 0 0-3-3h0a3 3 0 0 0-3 3v3" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {gifts.length > 1 && (
+          <button type="button" onClick={goNext} style={arrowStyle} aria-label="Next gift">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Dots */}
+      {gifts.length > 1 && (
+        <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          {gifts.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveIndex(idx)}
+              style={{
+                width: idx === activeIndex ? 16 : 6,
+                height: 6,
+                borderRadius: 3,
+                background: idx === activeIndex ? "#111" : "rgba(17,17,17,0.2)",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              aria-label={`Go to gift ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* CTA */}
+      <button
+        type="button"
+        style={{
+          marginTop: 12,
+          width: "100%",
+          padding: "10px 0",
+          borderRadius: 9999,
+          background: "#111",
+          color: "#fff",
+          border: "none",
+          fontSize: 12,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          cursor: "pointer",
+        }}
+      >
+        Unlock Your Gift
+      </button>
+    </div>
   );
 }
 
@@ -176,8 +391,8 @@ function PromotionCardPreview({ open, onClose, title, subtitle, gifts }) {
               <Skel w="100%" h={10} />
               <Skel w="100%" h={10} />
 
-              {/* ── Shared Promotion Card Widget ── */}
-              <PromotionCardWidget
+              {/* ── Promotion Card (inline styles for Polaris compat) ── */}
+              <PromotionCardInline
                 title={title}
                 subtitle={subtitle}
                 gifts={gifts}

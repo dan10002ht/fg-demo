@@ -26,6 +26,7 @@ import CampaignSummary from "@/components/admin/campaign-summary";
 import WidgetSetting from "@/components/admin/widget-setting";
 import OfferTitleModal from "@/components/admin/offer-title-modal";
 import useCampaignStore from "@/lib/campaign-store";
+import GiftPopupContent from "@/components/gift/gift-popup-content";
 
 /* ─── Toast notification ─── */
 function Toast({ message, onDismiss }) {
@@ -191,125 +192,29 @@ function PDPSkeleton() {
 function CustomerChoosesPreview() {
   const popupTitle = useCampaignStore((s) => s.popupTitle);
   const popupDescription = useCampaignStore((s) => s.popupDescription);
+  const getProducts = useCampaignStore((s) => s.getProducts);
+
+  const previewGifts = getProducts?.length > 0
+    ? getProducts.map((p) => ({
+        id: p.productId || p.title,
+        title: p.title || "Gift Product",
+        imageUrl: p.imageUrl || null,
+        price: parseFloat(p.price || 0),
+        currencyCode: "USD",
+      }))
+    : [{ id: "preview-1", title: "Gift Product", imageUrl: null, price: 786, currencyCode: "USD" }];
 
   return (
     <div style={{ position: "relative" }}>
       <StoreHeader />
       <PDPSkeleton />
-
-      {/* Gift popup overlay */}
-      <div
-        style={{
-          background: "#fff",
-          borderTop: "1px solid #eee",
-          padding: "16px 14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#222" }}>
-              {popupTitle}
-            </div>
-            <div style={{ fontSize: 11, color: "#666", marginTop: 4, lineHeight: "15px" }}>
-              {popupDescription}
-            </div>
-          </div>
-          <span style={{ fontSize: 14, color: "#999", cursor: "default", flexShrink: 0, marginLeft: 8 }}>&times;</span>
-        </div>
-
-        {/* Gift product card */}
-        <div
-          style={{
-            border: "1px solid #e0e0e0",
-            borderRadius: 10,
-            padding: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          {/* Product image */}
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              background: "#e8e8e8",
-              borderRadius: 6,
-              flexShrink: 0,
-              position: "relative",
-            }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                top: -4,
-                left: -4,
-                width: 16,
-                height: 16,
-                borderRadius: 4,
-                background: "#2e7d32",
-                color: "#fff",
-                fontSize: 8,
-                fontWeight: 700,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              1
-            </span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#222" }}>Gift Product</div>
-            <div style={{ fontSize: 11, marginTop: 2 }}>
-              <span style={{ fontWeight: 600 }}>$0</span>{" "}
-              <span style={{ color: "#999", textDecoration: "line-through" }}>$786</span>
-            </div>
-          </div>
-          {/* Checkbox */}
-          <div
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 4,
-              background: "#222",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </div>
-
-        {/* CTA */}
-        <button
-          type="button"
-          style={{
-            width: "100%",
-            padding: "11px 0",
-            background: "#222",
-            color: "#fff",
-            border: "none",
-            borderRadius: 24,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "default",
-          }}
-        >
-          Add to cart (1)
-        </button>
-        <div style={{ textAlign: "center", fontSize: 12, color: "#2e7d32", fontWeight: 500 }}>
-          Continue shopping
-        </div>
-      </div>
+      <GiftPopupContent
+        title={popupTitle}
+        description={popupDescription}
+        gifts={previewGifts}
+        selectedId={previewGifts[0]?.id}
+        interactive={false}
+      />
     </div>
   );
 }
@@ -730,12 +635,17 @@ function CampaignEditor({ onBack }) {
       <Page
         title={offerTitle}
         titleMetadata={
-          <Button
-            variant="plain"
-            icon={EditIcon}
-            onClick={() => setOfferTitleModalOpen(true)}
-            accessibilityLabel="Edit offer title"
-          />
+          <InlineStack gap="200" blockAlign="center">
+            <Button
+              variant="plain"
+              icon={EditIcon}
+              onClick={() => setOfferTitleModalOpen(true)}
+              accessibilityLabel="Edit offer title"
+            />
+            <Badge tone={isActive ? "success" : "critical"}>
+              {isActive ? "Active" : "Inactive"}
+            </Badge>
+          </InlineStack>
         }
         subtitle={
           editingCampaignId

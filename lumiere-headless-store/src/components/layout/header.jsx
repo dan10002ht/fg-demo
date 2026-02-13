@@ -17,7 +17,7 @@ export default function Header() {
     { href: "/", label: "Home" },
     { href: "/products", label: "Shop" },
     { href: "/collections", label: "Collections" },
-    { href: "/pages/joy-subscription", label: "My Subscriptions" },
+    { href: "/admin/free-gift", label: "Free gift admin" },
   ];
 
   return (

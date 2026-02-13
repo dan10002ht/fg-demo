@@ -58,10 +58,10 @@ function getDefaultCampaignFields() {
     promotionBadgeText: "🎁 FREE GIFT!!",
 
     // Widget Setting (Congrats bar / Pop-up)
-    congratsBarTitle: "Yay! Your cart with auto-added gifts is waiting - check now!",
+    congratsBarTitle: "A free gift has been added to your cart!",
     congratsBarDuration: 5,
-    popupTitle: "Woohoo, a special surprise awaits!",
-    popupDescription: "Your cart qualifies for special gifts. Add them now before checking out!",
+    popupTitle: "You've unlocked a free gift!",
+    popupDescription: "Choose your free gift below and add it to your cart before checkout.",
 
     // Meta
     isActive: false,
