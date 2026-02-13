@@ -3,6 +3,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import CartDrawer from "@/components/cart/cart-drawer";
 import CartInitializer from "@/components/layout/cart-initializer";
+import CampaignInitializer from "@/components/layout/campaign-initializer";
 import PageTransition from "@/components/motion/page-transition";
 import SubscriptionSDKProvider from "@/components/subscription/sdk-provider";
 import "./globals.css";
@@ -19,7 +20,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata = {
-  title: "MAISON | Premium Fashion & Apparel",
+  title: "LUMIERE | Premium Fashion & Apparel",
   description:
     "Elevate your style with premium clothing and accessories, curated for the modern wardrobe.",
 };
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
         <div className="h-[2px] bg-gradient-to-r from-transparent via-warm to-transparent" />
         <SubscriptionSDKProvider>
         <CartInitializer />
+        <CampaignInitializer />
         <Header />
         <main className="min-h-screen">
           <PageTransition>{children}</PageTransition>

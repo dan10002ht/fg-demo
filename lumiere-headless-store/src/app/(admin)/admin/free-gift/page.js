@@ -1004,11 +1004,14 @@ export default function FreeGiftAdminPage() {
   const loadCampaigns = useCampaignStore((s) => s.loadCampaigns);
   const createNewCampaign = useCampaignStore((s) => s.createNewCampaign);
   const editCampaign = useCampaignStore((s) => s.editCampaign);
+  const syncDefaultCampaignDiscount = useCampaignStore((s) => s.syncDefaultCampaignDiscount);
 
   useEffect(() => {
     loadCampaigns();
+    // Create Shopify discount for default campaign if needed (first visit)
+    syncDefaultCampaignDiscount();
     setMounted(true);
-  }, [loadCampaigns]);
+  }, [loadCampaigns, syncDefaultCampaignDiscount]);
 
   const handleCreate = useCallback(() => {
     createNewCampaign();
