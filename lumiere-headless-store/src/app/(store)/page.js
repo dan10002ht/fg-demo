@@ -1,37 +1,29 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Flame,
+  Shirt,
   Package,
   Heart,
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductGrid from "@/components/product/product-grid";
-import CollectionCard from "@/components/collection/collection-card";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "@/components/motion/motion-wrapper";
 import ScrollIndicator from "@/components/motion/scroll-indicator";
-import { getProducts, getCollections } from "@/lib/shopify";
+import { getProducts } from "@/lib/shopify";
 
 export default async function HomePage() {
   let products = [];
-  let collections = [];
 
   try {
     const productData = await getProducts({ first: 8 });
     products = productData.products;
   } catch (e) {
     console.error("Failed to fetch products:", e);
-  }
-
-  try {
-    collections = await getCollections(6);
-  } catch (e) {
-    console.error("Failed to fetch collections:", e);
   }
 
   return (
@@ -45,7 +37,7 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-3xl text-center">
           <FadeIn delay={0.1}>
             <p className="mb-4 text-xs uppercase tracking-[0.4em] text-muted-foreground">
-              Handcrafted Soy Candles
+              Premium Fashion & Apparel
             </p>
           </FadeIn>
 
@@ -60,16 +52,16 @@ export default async function HomePage() {
 
           <FadeIn delay={0.3}>
             <h2 className="font-serif text-5xl font-light leading-tight tracking-wide sm:text-6xl lg:text-7xl">
-              Illuminate
+              Elevate
               <br />
-              Your Space
+              Your Style
             </h2>
           </FadeIn>
 
           <FadeIn delay={0.5}>
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
-              Discover our curated collection of handcrafted soy candles and
-              home fragrances, delivered to your door every month.
+              Discover our curated collection of premium clothing and
+              accessories, designed for the modern lifestyle.
             </p>
           </FadeIn>
 
@@ -88,7 +80,7 @@ export default async function HomePage() {
                 size="lg"
                 className="h-12 px-10 text-xs uppercase tracking-wider hover:bg-warm/10 hover:text-warm"
               >
-                <Link href="/collections">View Collections</Link>
+                <Link href="/products">New Arrivals</Link>
               </Button>
             </div>
           </FadeIn>
@@ -107,32 +99,32 @@ export default async function HomePage() {
             How It Works
           </h2>
           <p className="mx-auto mt-3 max-w-md text-center text-sm text-muted-foreground">
-            Your monthly ritual of warmth and fragrance, in three simple steps.
+            Your perfect outfit, in three simple steps.
           </p>
         </FadeIn>
 
         <StaggerContainer className="mt-16 grid grid-cols-1 gap-12 md:grid-cols-3" stagger={0.15}>
           {[
             {
-              icon: Flame,
+              icon: Shirt,
               num: "01",
-              title: "Choose Your Scents",
+              title: "Browse & Choose",
               description:
-                "Browse our curated collection and pick your favorites, or let us surprise you with our monthly selection.",
+                "Explore our curated collection and pick your favorites, from everyday essentials to statement pieces.",
             },
             {
               icon: Package,
               num: "02",
-              title: "Receive Monthly",
+              title: "Fast Delivery",
               description:
-                "Your handcrafted candles are carefully packaged and delivered to your doorstep every month.",
+                "Your order is carefully packaged and delivered straight to your doorstep with free shipping.",
             },
             {
               icon: Heart,
               num: "03",
-              title: "Enjoy & Relax",
+              title: "Wear & Love",
               description:
-                "Light up, unwind, and let the warm glow and soothing scents transform your space.",
+                "Step out in style and confidence with premium quality clothing designed for comfort and elegance.",
             },
           ].map((step, index) => (
             <StaggerItem key={index}>
@@ -165,7 +157,7 @@ export default async function HomePage() {
                   Best Sellers
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Our most loved scents, handpicked for you.
+                  Our most loved pieces, handpicked for you.
                 </p>
               </div>
               <Link
@@ -197,14 +189,14 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
           <FadeIn>
             <p className="text-xs uppercase tracking-[0.4em] text-warm-light">
-              Monthly Subscription
+              Exclusive Membership
             </p>
             <h2 className="mt-4 font-serif text-3xl font-light tracking-wide sm:text-4xl">
-              Never Run Out of Your Favorite Scents
+              Always Dressed in the Latest Styles
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-background/60">
-              Subscribe and save. Get a curated selection of our finest candles
-              and home fragrances delivered to your door each month.
+              Subscribe and save. Get early access to new collections,
+              exclusive discounts, and curated outfit picks delivered monthly.
             </p>
             <Button
               asChild
@@ -218,38 +210,6 @@ export default async function HomePage() {
         <div className="h-px bg-gradient-to-r from-transparent via-warm/30 to-transparent" />
       </section>
 
-      {/* Collections */}
-      {collections.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <FadeIn>
-            <div className="flex items-end justify-between">
-              <div>
-                <h2 className="font-serif text-3xl font-light tracking-wide">
-                  Our Collections
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Explore scents for every mood and moment.
-                </p>
-              </div>
-              <Link
-                href="/collections"
-                className="group hidden items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
-              >
-                View All{" "}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </FadeIn>
-
-          <StaggerContainer className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {collections.slice(0, 3).map((collection) => (
-              <StaggerItem key={collection.id}>
-                <CollectionCard collection={collection} />
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </section>
-      )}
     </>
   );
 }

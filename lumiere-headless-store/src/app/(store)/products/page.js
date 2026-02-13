@@ -5,7 +5,7 @@ import { getProducts } from "@/lib/shopify";
 export const metadata = {
   title: "Shop All | LUMIERE",
   description:
-    "Browse our full collection of handcrafted soy candles and home fragrances.",
+    "Browse our full collection of premium clothing and accessories.",
 };
 
 export default async function ProductsPage() {
@@ -31,7 +31,7 @@ export default async function ProductsPage() {
             All Products
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            {products.length} handcrafted candles and home fragrances.
+            {products.length} premium clothing and accessories.
           </p>
           <div className="mt-6 h-px w-16 bg-warm/50" />
         </div>

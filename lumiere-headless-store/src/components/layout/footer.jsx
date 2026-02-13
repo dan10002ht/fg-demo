@@ -10,10 +10,10 @@ export default function Footer() {
           {/* Newsletter */}
           <div className="mb-12 text-center">
             <h3 className="font-serif text-2xl font-light tracking-wide">
-              Stay Illuminated
+              Stay in Style
             </h3>
             <p className="mt-2 text-sm text-background/60">
-              Subscribe for exclusive scents, early access, and candlelit
+              Subscribe for new arrivals, exclusive deals, and style
               inspiration.
             </p>
             <div className="mx-auto mt-6 flex max-w-sm gap-3">
@@ -42,8 +42,8 @@ export default function Footer() {
               LUMIERE
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-background/50">
-              Handcrafted soy candles and home fragrances, thoughtfully curated
-              and delivered to your door.
+              Premium fashion and apparel, thoughtfully curated
+              for the modern wardrobe.
             </p>
           </div>
 
@@ -63,10 +63,10 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/collections"
+                  href="/products"
                   className="text-sm text-background/50 transition-colors hover:text-warm"
                 >
-                  Collections
+                  New Arrivals
                 </Link>
               </li>
             </ul>

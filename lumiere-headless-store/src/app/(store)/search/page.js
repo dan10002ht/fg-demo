@@ -28,7 +28,7 @@ export default async function SearchPage({ searchParams }) {
       <FadeIn>
         <div className="mb-12">
           <p className="mb-3 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Find Your Scent
+            Find Your Style
           </p>
           <h1 className="font-serif text-4xl font-light tracking-wide lg:text-5xl">
             Search
@@ -44,7 +44,7 @@ export default async function SearchPage({ searchParams }) {
             <Input
               name="q"
               type="search"
-              placeholder="Search candles, scents, collections..."
+              placeholder="Search clothing, accessories, styles..."
               defaultValue={q || ""}
               className="h-12 pl-11 pr-4 text-sm tracking-wide"
             />
@@ -73,7 +73,7 @@ export default async function SearchPage({ searchParams }) {
                   No results found
                 </p>
                 <p className="mt-1 text-center text-xs text-muted-foreground">
-                  Try adjusting your search or explore our collections for inspiration.
+                  Try adjusting your search or browse our shop for inspiration.
                 </p>
               </div>
             </FadeIn>
@@ -89,7 +89,7 @@ export default async function SearchPage({ searchParams }) {
               Discover something new
             </p>
             <p className="mt-1 text-center text-xs text-muted-foreground">
-              Enter a search term to find candles, scents, and more.
+              Enter a search term to find clothing, accessories, and more.
             </p>
           </div>
         </FadeIn>

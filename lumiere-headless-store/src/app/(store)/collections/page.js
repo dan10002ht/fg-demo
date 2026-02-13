@@ -4,7 +4,7 @@ import { getCollections } from "@/lib/shopify";
 
 export const metadata = {
   title: "Collections | LUMIERE",
-  description: "Explore our curated collections of handcrafted candles and home fragrances.",
+  description: "Explore our curated collections of premium clothing and accessories.",
 };
 
 export default async function CollectionsPage() {
@@ -27,7 +27,7 @@ export default async function CollectionsPage() {
             Our Collections
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Explore scents curated for every mood and moment.
+            Explore styles curated for every occasion and mood.
           </p>
           <div className="mt-6 h-px w-16 bg-warm/50" />
         </div>

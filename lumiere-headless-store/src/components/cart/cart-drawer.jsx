@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Minus, Plus, Trash2, Flame, Gift, X } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Gift, X } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -158,15 +158,15 @@ export default function CartDrawer() {
           {lines.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
-                <Flame className="h-7 w-7 text-warm/50" />
+                <ShoppingBag className="h-7 w-7 text-warm/50" />
               </div>
               <div className="text-center">
                 <p className="font-serif text-lg font-light">
                   Your cart is empty
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Discover our handcrafted candles and fill your space with
-                  warmth.
+                  Discover our latest collection and elevate your
+                  wardrobe.
                 </p>
               </div>
               <Button

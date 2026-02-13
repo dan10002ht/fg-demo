@@ -8,12 +8,12 @@ import { Search, X, ArrowRight, Clock, TrendingUp } from "lucide-react";
 import { formatPrice } from "@/lib/shopify";
 
 const POPULAR_SEARCHES = [
-  "Candles",
-  "Vanilla",
-  "Lavender",
-  "Gift Sets",
-  "Soy Wax",
-  "Home Fragrance",
+  "Dresses",
+  "T-Shirts",
+  "Jackets",
+  "Accessories",
+  "New Arrivals",
+  "Sale",
 ];
 
 const RECENT_SEARCHES_KEY = "lumiere_recent_searches";

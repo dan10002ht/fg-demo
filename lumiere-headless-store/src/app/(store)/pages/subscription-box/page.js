@@ -3,7 +3,7 @@ import SubscriptionBoxClient from "./subscription-box-client";
 export const metadata = {
   title: "Subscription Box | LUMIERE",
   description:
-    "Build your custom candle subscription box. Choose your scents, set your frequency, and save.",
+    "Build your custom style subscription box. Choose your favorites, set your frequency, and save.",
 };
 
 export default function SubscriptionBoxPage() {

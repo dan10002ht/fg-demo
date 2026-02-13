@@ -19,9 +19,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata = {
-  title: "LUMIERE | Candle & Home Scent Subscription",
+  title: "MAISON | Premium Fashion & Apparel",
   description:
-    "Illuminate your space with handcrafted soy candles and home fragrances, delivered monthly to your door.",
+    "Elevate your style with premium clothing and accessories, curated for the modern wardrobe.",
 };
 
 export default function RootLayout({ children }) {

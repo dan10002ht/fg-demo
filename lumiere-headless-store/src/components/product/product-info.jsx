@@ -182,10 +182,10 @@ export default function ProductInfo({ product }) {
           <Truck className="h-3.5 w-3.5" /> Free Shipping
         </span>
         <span className="flex items-center gap-1.5">
-          <Leaf className="h-3.5 w-3.5" /> Natural Soy
+          <Leaf className="h-3.5 w-3.5" /> Premium Quality
         </span>
         <span className="flex items-center gap-1.5">
-          <Hand className="h-3.5 w-3.5" /> Handcrafted
+          <Hand className="h-3.5 w-3.5" /> Ethically Made
         </span>
       </div>
 
