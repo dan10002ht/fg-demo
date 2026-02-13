@@ -640,6 +640,30 @@ export default function WidgetSetting() {
               />
             </BlockStack>
           )}
+
+          <Divider />
+
+          {/* ── Out-of-stock message ── */}
+          <Text as="h3" variant="headingSm">
+            Out of stock message
+          </Text>
+
+          <Checkbox
+            label="Show message when gift product is insufficient stock"
+            helpText="Display a message when the gift product doesn't have enough inventory to fulfill the required quantity."
+            checked={showOosMessage}
+            onChange={(val) => setField("showOosMessage", val)}
+          />
+
+          {showOosMessage && (
+            <TextField
+              label="Message"
+              value={oosMessage}
+              onChange={(val) => setField("oosMessage", val)}
+              autoComplete="off"
+              multiline={2}
+            />
+          )}
         </BlockStack>
       </Card>
 
@@ -710,30 +734,6 @@ export default function WidgetSetting() {
               onChange={(val) => setField("promotionBadgeText", val)}
               autoComplete="off"
               helpText="Text displayed on the promotion badge."
-            />
-          )}
-
-          <Divider />
-
-          {/* ── Out-of-stock message ── */}
-          <Text as="h3" variant="headingSm">
-            Out of stock message
-          </Text>
-
-          <Checkbox
-            label="Show message when gift product is insufficient stock"
-            helpText="Display a message when the gift product doesn't have enough inventory to fulfill the required quantity."
-            checked={showOosMessage}
-            onChange={(val) => setField("showOosMessage", val)}
-          />
-
-          {showOosMessage && (
-            <TextField
-              label="Message"
-              value={oosMessage}
-              onChange={(val) => setField("oosMessage", val)}
-              autoComplete="off"
-              multiline={2}
             />
           )}
 
