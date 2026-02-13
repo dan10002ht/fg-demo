@@ -64,7 +64,7 @@ function getDefaultCampaignFields() {
     popupDescription: "Choose your free gift below and add it to your cart before checkout.",
 
     // Meta
-    isActive: false,
+    isActive: true,
     shopifyDiscountId: null, // Shopify Admin API discount node ID
   };
 }

@@ -10,7 +10,7 @@ import {
 } from "@/lib/free-gift";
 import PromotionCardWidget from "@/components/gift/promotion-card-widget";
 
-export default function PromotionCard({ product }) {
+export default function PromotionCard({ product, onAddToCart }) {
   const [visible, setVisible] = useState(false);
   const [config, setConfig] = useState(null);
   const [gifts, setGifts] = useState([]);
@@ -68,12 +68,7 @@ export default function PromotionCard({ product }) {
       : "Buy this product to receive a gift";
 
   const handleCta = () => {
-    // Scroll to Add to Cart button so user can choose variant/quantity
-    const btn = document.getElementById("add-to-cart-btn");
-    if (btn) {
-      btn.scrollIntoView({ behavior: "smooth", block: "center" });
-      btn.focus();
-    }
+    if (onAddToCart) onAddToCart();
   };
 
   return (

@@ -101,7 +101,7 @@ export default function ProductInfo({ product }) {
       <Separator />
 
       {/* Free Gift Promotion Card */}
-      <PromotionCard product={product} />
+      <PromotionCard product={product} onAddToCart={handleAddToCart} />
 
       {/* Variant options */}
       {optionNames.length > 0 && (

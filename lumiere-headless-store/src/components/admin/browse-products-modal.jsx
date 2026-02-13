@@ -242,10 +242,15 @@ export default function BrowseProductsModal({ open, onClose, onConfirm, mode, br
   const renderProductItem = (product, index) => {
     const isSelected = !!selectedItems[product.id];
     const variants = product.variants.edges.map((e) => e.node);
+    const isSingleVariant = variants.length === 1;
     const imageUrl =
       product.images.edges.length > 0 ? product.images.edges[0].node.url : null;
     const selectedVariantCount = selectedItems[product.id]?.selectedVariants?.size ?? 0;
     const minPrice = product.priceRange?.minVariantPrice;
+
+    // Single-variant: show price & stock inline on the product row
+    const singleVariant = isSingleVariant ? variants[0] : null;
+    const singleQty = singleVariant?.quantityAvailable;
 
     return (
       <div
@@ -288,38 +293,54 @@ export default function BrowseProductsModal({ open, onClose, onConfirm, mode, br
             <Text as="span" variant="bodyMd" fontWeight="semibold">
               {product.title}
             </Text>
-            <Text as="p" variant="bodySm" tone="subdued">
-              {isSelected
-                ? `${selectedVariantCount} of ${variants.length} variant${variants.length !== 1 ? "s" : ""} selected`
-                : `${variants.length} variant${variants.length !== 1 ? "s" : ""}`}
-              {minPrice && ` · From ${formatPrice(minPrice.amount, "VND")}`}
-            </Text>
+            {isSingleVariant ? (
+              <InlineStack gap="100" blockAlign="center">
+                <Text as="span" variant="bodySm">
+                  {formatPrice(singleVariant.price.amount, "VND")}
+                </Text>
+                {singleQty != null && (
+                  <Text as="span" variant="bodySm" tone={singleQty === 0 ? "critical" : "subdued"}>
+                    · {singleQty === 0 ? "Out of stock" : `${singleQty} available`}
+                  </Text>
+                )}
+              </InlineStack>
+            ) : (
+              <Text as="p" variant="bodySm" tone="subdued">
+                {isSelected
+                  ? `${selectedVariantCount} of ${variants.length} variants selected`
+                  : `${variants.length} variants`}
+                {minPrice && ` · From ${formatPrice(minPrice.amount, "VND")}`}
+              </Text>
+            )}
           </div>
         </div>
 
-        <div
-          style={{
-            borderTop: "1px solid var(--p-color-border-secondary)",
-            background: "var(--p-color-bg-surface-secondary)",
-            paddingLeft: 76,
-            paddingRight: 16,
-            paddingBottom: 8,
-            paddingTop: 4,
-          }}
-        >
-          {variants.map((variant) => {
-            const variantChecked =
-              selectedItems[product.id]?.selectedVariants?.has(variant.id) ?? false;
-            return (
-              <VariantRow
-                key={variant.id}
-                variant={variant}
-                checked={variantChecked}
-                onToggle={() => toggleVariant(product, variant.id)}
-              />
-            );
-          })}
-        </div>
+        {/* Only show variant sub-items for multi-variant products */}
+        {!isSingleVariant && (
+          <div
+            style={{
+              borderTop: "1px solid var(--p-color-border-secondary)",
+              background: "var(--p-color-bg-surface-secondary)",
+              paddingLeft: 76,
+              paddingRight: 16,
+              paddingBottom: 8,
+              paddingTop: 4,
+            }}
+          >
+            {variants.map((variant) => {
+              const variantChecked =
+                selectedItems[product.id]?.selectedVariants?.has(variant.id) ?? false;
+              return (
+                <VariantRow
+                  key={variant.id}
+                  variant={variant}
+                  checked={variantChecked}
+                  onToggle={() => toggleVariant(product, variant.id)}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
