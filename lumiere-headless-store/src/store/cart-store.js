@@ -120,12 +120,14 @@ const useCartStore = create((set, get) => ({
       const gifts = await getAvailableGifts(config);
 
       if (!gifts.length) {
-        set({
-          giftNotification: {
-            type: "outOfStock",
-            message: "Free gift is currently out of stock",
-          },
-        });
+        if (config.showOosMessage) {
+          set({
+            giftNotification: {
+              type: "outOfStock",
+              message: config.oosMessage || "Free gift is currently out of stock",
+            },
+          });
+        }
         return cart;
       }
 

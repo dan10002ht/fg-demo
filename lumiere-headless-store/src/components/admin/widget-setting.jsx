@@ -15,7 +15,6 @@ import {
 } from "@shopify/polaris";
 import { ViewIcon } from "@shopify/polaris-icons";
 import useCampaignStore from "@/lib/campaign-store";
-import PromotionBadge from "@/components/gift/promotion-badge";
 
 /* ─── Skeleton bar helper ─── */
 function Skel({ w = "100%", h = 12, r = 4 }) {
@@ -406,22 +405,53 @@ function PromotionCardPreview({ open, onClose, title, subtitle, gifts }) {
   );
 }
 
-/* ─── Badge Product Card helper (mirrors storefront ProductCard layout) ─── */
+/* ─── Badge Product Card helper (inline styles for Polaris compat) ─── */
 function BadgeProductCard({ title, price, badgeText, hasBadge }) {
   return (
     <div>
-      <div className="relative aspect-square overflow-hidden rounded bg-muted">
+      <div
+        style={{
+          position: "relative",
+          aspectRatio: "1",
+          overflow: "hidden",
+          borderRadius: 6,
+          background: "#e8e8e8",
+        }}
+      >
         {hasBadge && (
-          <div className="absolute bottom-3 left-3 z-0">
-            <PromotionBadge text={badgeText || "FREE GIFT"} />
+          <div style={{ position: "absolute", bottom: 10, left: 10 }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                background: "#059669",
+                color: "#fff",
+                padding: "4px 8px",
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                lineHeight: 1,
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="8" width="18" height="13" rx="2" />
+                <path d="M12 8V5a3 3 0 0 0-3-3h0a3 3 0 0 0-3 3v3M18 8V5a3 3 0 0 0-3-3h0a3 3 0 0 0-3 3v3" />
+              </svg>
+              {badgeText || "FREE GIFT"}
+            </span>
           </div>
         )}
       </div>
-      <div className="mt-3 space-y-1">
-        <h3 className="font-serif text-sm font-medium leading-tight tracking-wide">
+      <div style={{ marginTop: 10 }}>
+        <p style={{ fontSize: 13, fontWeight: 500, color: "#111", margin: 0 }}>
           {title}
-        </h3>
-        <span className="text-sm">{price}</span>
+        </p>
+        <p style={{ fontSize: 13, color: "#555", margin: "4px 0 0" }}>
+          {price}
+        </p>
       </div>
     </div>
   );
@@ -484,6 +514,8 @@ export default function WidgetSetting() {
   const congratsBarDuration = useCampaignStore((s) => s.congratsBarDuration);
   const popupTitle = useCampaignStore((s) => s.popupTitle);
   const popupDescription = useCampaignStore((s) => s.popupDescription);
+  const showOosMessage = useCampaignStore((s) => s.showOosMessage);
+  const oosMessage = useCampaignStore((s) => s.oosMessage);
   const minimumQuantity = useCampaignStore((s) => s.minimumQuantity);
   const getProducts = useCampaignStore((s) => s.getProducts);
   const setField = useCampaignStore((s) => s.setField);
@@ -678,6 +710,30 @@ export default function WidgetSetting() {
               onChange={(val) => setField("promotionBadgeText", val)}
               autoComplete="off"
               helpText="Text displayed on the promotion badge."
+            />
+          )}
+
+          <Divider />
+
+          {/* ── Out-of-stock message ── */}
+          <Text as="h3" variant="headingSm">
+            Out of stock message
+          </Text>
+
+          <Checkbox
+            label="Show message when gift product is insufficient stock"
+            helpText="Display a message when the gift product doesn't have enough inventory to fulfill the required quantity."
+            checked={showOosMessage}
+            onChange={(val) => setField("showOosMessage", val)}
+          />
+
+          {showOosMessage && (
+            <TextField
+              label="Message"
+              value={oosMessage}
+              onChange={(val) => setField("oosMessage", val)}
+              autoComplete="off"
+              multiline={2}
             />
           )}
 

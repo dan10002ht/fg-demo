@@ -63,6 +63,10 @@ function getDefaultCampaignFields() {
     popupTitle: "You've unlocked a free gift!",
     popupDescription: "Choose your free gift below and add it to your cart before checkout.",
 
+    // Out-of-stock message
+    showOosMessage: false,
+    oosMessage: "Sorry, the free gift is currently unavailable due to limited stock.",
+
     // Meta
     isActive: true,
     shopifyDiscountId: null, // Shopify Admin API discount node ID
